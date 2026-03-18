@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>RV-10 Checklist — X-Plane 12</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #1c2333;
+    --border: #30363d;
+    --text: #e6edf3;
+    --text2: #8b949e;
+    --text3: #484f58;
+    --green: #3fb950;
+    --green-dim: #1a3a22;
+    --green-glow: rgba(63,185,80,0.15);
+    --amber: #d29922;
+    --amber-dim: #3a2a00;
+    --blue: #58a6ff;
+    --blue-dim: #0d2a4a;
+    --red: #f85149;
+    --purple: #bc8cff;
+    --teal: #39d353;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  header {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 20px 20px 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(10px);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .aircraft-id {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  h1 span {
+    color: var(--green);
+  }
+
+  .header-meta {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+
+  .global-progress {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .progress-bar-wrap {
+    flex: 1;
+    height: 4px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .progress-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  .reset-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Barlow', sans-serif;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .reset-btn:active {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  .nav-tabs {
+    display: flex;
+    overflow-x: auto;
+    gap: 4px;
+    padding: 12px 20px 0;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .nav-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+
+  .tab-btn.active {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  .tab-btn.complete {
+    background: var(--green-dim);
+    border-color: var(--green);
+    color: var(--green);
+    opacity: 0.6;
+  }
+
+  .content {
+    padding: 16px 16px 0;
+  }
+
+  .section {
+    display: none;
+  }
+
+  .section.active {
+    display: block;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0 12px;
+  }
+
+  .section-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  .section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+
+  .section-count {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 2px;
+  }
+
+  .items-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .item:active {
+    transform: scale(0.98);
+    background: var(--bg3);
+  }
+
+  .item.checked {
+    background: var(--green-dim);
+    border-color: #2ea043;
+    opacity: 0.75;
+  }
+
+  .checkbox {
+    width: 24px;
+    height: 24px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    background: var(--bg);
+  }
+
+  .item.checked .checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .checkmark {
+    display: none;
+    width: 12px;
+    height: 12px;
+  }
+
+  .item.checked .checkmark {
+    display: block;
+  }
+
+  .item-label {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .item.checked .item-label {
+    color: var(--text2);
+    text-decoration: line-through;
+    text-decoration-color: var(--green);
+  }
+
+  .item-value {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .val-green { background: var(--green-dim); color: var(--green); border: 1px solid #2ea043; }
+  .val-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid #704e00; }
+  .val-blue { background: var(--blue-dim); color: var(--blue); border: 1px solid #1f4a7a; }
+  .val-red { background: #2a0d0d; color: var(--red); border: 1px solid #6e1a1a; }
+  .val-purple { background: #1e1a2e; color: var(--purple); border: 1px solid #4a3570; }
+  .val-default { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+
+  .section-progress {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-top: 8px;
+    margin-bottom: 16px;
+  }
+
+  .sec-progress-bar-wrap {
+    flex: 1;
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .sec-progress-bar-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+
+  .sec-progress-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--text2);
+    min-width: 50px;
+    text-align: right;
+  }
+
+  .complete-banner {
+    display: none;
+    background: var(--green-dim);
+    border: 1px solid var(--green);
+    border-radius: 12px;
+    padding: 16px 20px;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  .complete-banner.show {
+    display: block;
+  }
+
+  .complete-banner p {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .complete-banner small {
+    font-size: 12px;
+    color: var(--text2);
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .speeds-section {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 8px;
+  }
+
+  .speeds-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  .speed-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .speed-row:last-child { border-bottom: none; }
+
+  .speed-name { font-size: 13px; color: var(--text2); }
+
+  .speed-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--blue);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-top">
+    <div>
+      <div class="aircraft-id">VAN'S RV-10 · LYCOMING IO-540 · 260HP</div>
+      <h1>RV-10 <span>CHECKLIST</span></h1>
+      <div class="header-meta">X-PLANE 12 · LAMINAR RESEARCH</div>
+    </div>
+    <button class="reset-btn" onclick="resetAll()">⟳ Reset</button>
+  </div>
+  <div class="global-progress">
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="global-bar"></div>
+    </div>
+    <div class="progress-label" id="global-label">0 / 0</div>
+  </div>
+</header>
+
+<div class="nav-tabs" id="nav-tabs"></div>
+
+<div class="content" id="content"></div>
+
+<script>
+const sections = [
+  {
+    id: 'preflight', label: 'Pré-vol', icon: '🔍', color: 'blue',
+    items: [
+      ['Fuselage & surfaces de contrôle', 'Vérifier dommages', 'default'],
+      ['Gouvernes', 'Libres & dégagées', 'green'],
+      ['Trains d\'atterrissage', 'Pneumatiques & amortisseurs OK', 'green'],
+      ['Hélice', 'Sans dommages ni fissures', 'green'],
+      ['Entrées d\'air moteur', 'Dégagées', 'green'],
+      ['Réservoirs carburant', 'Vérifier niveau + bouchons', 'amber'],
+      ['Drains carburant', 'Purger eau / contaminants', 'amber'],
+      ['Huile moteur', '6 qts minimum', 'amber'],
+      ['Prises statique & Pitot', 'Dégagées', 'green'],
+      ['Antennes', 'Intactes', 'green'],
+      ['Portes', 'Charnières & loquets OK', 'green'],
+    ]
+  },
+  {
+    id: 'start', label: 'Démarrage', icon: '⚡', color: 'amber',
+    items: [
+      ['Frein de parking', 'SERRÉ', 'red'],
+      ['Master Battery', 'ON', 'green'],
+      ['Avionics Master', 'OFF', 'red'],
+      ['Alternateur', 'OFF', 'red'],
+      ['Autopilot', 'OFF', 'red'],
+      ['Sélecteur carburant', 'LEFT ou RIGHT', 'amber'],
+      ['Pompe carburant électrique', 'ON — primer 3–5 sec', 'green'],
+      ['Pompe carburant électrique', 'OFF', 'red'],
+      ['Mixture', 'PLEIN RICHE', 'green'],
+      ['Manette des gaz', '1/4 ouverture', 'amber'],
+      ['Strobes', 'ON', 'green'],
+      ['Zone avion', 'Crier "CLEAR PROP"', 'red'],
+      ['Démarreur', 'APPUYER (max 10 sec)', 'amber'],
+      ['Alternateur (après démarrage)', 'ON', 'green'],
+      ['Avionics Master', 'ON', 'green'],
+      ['Pression huile', 'Vérifier dans 30 sec', 'amber'],
+      ['Instruments', 'Vérifier & initialiser', 'blue'],
+    ]
+  },
+  {
+    id: 'taxi', label: 'Roulage', icon: '🛬', color: 'teal',
+    items: [
+      ['Frein de parking', 'RELÂCHER', 'green'],
+      ['Freins', 'Tester gauche & droite', 'amber'],
+      ['G1000 PFD / MFD', 'Affichage normal', 'green'],
+      ['Gyro cap', 'Caler sur cap magnétique', 'blue'],
+      ['Altimètre', 'Réglage QNH', 'blue'],
+      ['Feux de roulage (TAXI)', 'ON', 'green'],
+    ]
+  },
+  {
+    id: 'takeoff', label: 'Décollage', icon: '🛫', color: 'green',
+    items: [
+      ['Volets (Flaps)', 'MOITIÉ (décollage normal)', 'amber'],
+      ['Trim de tangage', 'POSITION DÉCOLLAGE', 'green'],
+      ['Mixture', 'PLEIN RICHE', 'green'],
+      ['Pompe carburant', 'ON', 'green'],
+      ['Pression carburant', 'Dans le vert', 'green'],
+      ['Instruments moteur', 'Tous dans le vert', 'green'],
+      ['Pas hélice', 'AVANT (régime max)', 'green'],
+      ['Feux navigation', 'ON', 'green'],
+      ['Feux atterrissage', 'ON', 'green'],
+      ['Altimètre', 'Calé QNH', 'blue'],
+      ['Transpondeur', 'ALT', 'blue'],
+      ['Piste', 'Dégagée — clearance OK', 'red'],
+    ]
+  },
+  {
+    id: 'climb', label: 'Montée', icon: '↗', color: 'purple',
+    items: [
+      ['Vitesse', '> 65 kts avant rentrée volets', 'amber'],
+      ['Volets', 'RENTRÉS', 'green'],
+      ['Pompe carburant', 'OFF (après 1000 ft)', 'red'],
+      ['Feux atterrissage', 'OFF', 'red'],
+      ['Mixture', 'Appauvrir si > 3000 ft', 'amber'],
+    ]
+  },
+  {
+    id: 'cruise', label: 'Croisière', icon: '✈', color: 'blue',
+    items: [
+      ['Puissance moteur', '65–75% (throttle + prop)', 'amber'],
+      ['Mixture', 'Appauvrir (EGT peak −50°F)', 'amber'],
+      ['Sélecteur carburant', 'Alterner réservoirs / 30 min', 'blue'],
+      ['Instruments moteur', 'Surveiller en continu', 'green'],
+      ['Trim', 'Ajuster pour vol en palier', 'default'],
+    ]
+  },
+  {
+    id: 'landing', label: 'Atterrissage', icon: '🛬', color: 'red',
+    items: [
+      ['Altimètre', 'Recaler QNH', 'blue'],
+      ['Sélecteur carburant', 'Réservoir le plus plein', 'amber'],
+      ['Pompe carburant', 'ON', 'green'],
+      ['Mixture', 'PLEIN RICHE', 'green'],
+      ['Pas hélice', 'AVANT', 'green'],
+      ['Volets en base', 'MOITIÉ', 'amber'],
+      ['Volets en finale', 'PLEIN', 'amber'],
+      ['Vitesse approche volets mi', '75 kts', 'blue'],
+      ['Vitesse finale volets plein', '65 kts', 'blue'],
+      ['Feux atterrissage', 'ON', 'green'],
+      ['Piste', 'Dégagée — clearance OK', 'red'],
+    ]
+  },
+  {
+    id: 'parking', label: 'Parking', icon: '🅿', color: 'default',
+    items: [
+      ['Volets', 'RENTRÉS', 'green'],
+      ['Pompe carburant', 'OFF', 'red'],
+      ['Feux atterrissage', 'OFF', 'red'],
+      ['Transpondeur', 'STBY', 'amber'],
+      ['Frein de parking', 'SERRÉ', 'red'],
+      ['Manette des gaz', 'RALENTI 1000 RPM — 1 min', 'amber'],
+      ['Mixture', 'COUPER MOTEUR (tirer tout)', 'red'],
+      ['Allumage / Magnétos', 'OFF après arrêt moteur', 'red'],
+      ['Avionics Master', 'OFF', 'red'],
+      ['Alternateur', 'OFF', 'red'],
+      ['Master Battery', 'OFF', 'red'],
+      ['Feux navigation', 'OFF', 'red'],
+    ]
+  },
+];
+
+const state = {};
+let totalItems = 0;
+
+sections.forEach(s => {
+  s.items.forEach((_, i) => {
+    state[s.id + i] = false;
+    totalItems++;
+  });
+});
+
+function getChecked() {
+  return Object.values(state).filter(Boolean).length;
+}
+
+function getSectionChecked(sid) {
+  const sec = sections.find(s => s.id === sid);
+  return sec.items.filter((_, i) => state[sid + i]).length;
+}
+
+function updateGlobal() {
+  const done = getChecked();
+  const pct = totalItems ? (done / totalItems * 100) : 0;
+  document.getElementById('global-bar').style.width = pct + '%';
+  document.getElementById('global-label').textContent = done + ' / ' + totalItems;
+}
+
+function updateSection(sid) {
+  const sec = sections.find(s => s.id === sid);
+  const done = getSectionChecked(sid);
+  const total = sec.items.length;
+  const pct = total ? (done / total * 100) : 0;
+  const barEl = document.getElementById('sec-bar-' + sid);
+  const labelEl = document.getElementById('sec-label-' + sid);
+  const bannerEl = document.getElementById('banner-' + sid);
+  const tabEl = document.getElementById('tab-' + sid);
+  if (barEl) barEl.style.width = pct + '%';
+  if (labelEl) labelEl.textContent = done + ' / ' + total;
+  if (bannerEl) bannerEl.classList.toggle('show', done === total);
+  if (tabEl) tabEl.classList.toggle('complete', done === total && done > 0);
+}
+
+function toggle(sid, idx) {
+  const key = sid + idx;
+  state[key] = !state[key];
+  const itemEl = document.getElementById('item-' + key);
+  itemEl.classList.toggle('checked', state[key]);
+  updateSection(sid);
+  updateGlobal();
+}
+
+function showSection(sid) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('sec-' + sid).classList.add('active');
+  document.getElementById('tab-' + sid).classList.add('active');
+  document.getElementById('tab-' + sid).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+
+function resetAll() {
+  Object.keys(state).forEach(k => state[k] = false);
+  document.querySelectorAll('.item').forEach(el => el.classList.remove('checked'));
+  sections.forEach(s => updateSection(s.id));
+  updateGlobal();
+}
+
+function valClass(type) {
+  return 'item-value val-' + (type || 'default');
+}
+
+// Build nav
+const navEl = document.getElementById('nav-tabs');
+sections.forEach((sec, idx) => {
+  const btn = document.createElement('button');
+  btn.className = 'tab-btn' + (idx === 0 ? ' active' : '');
+  btn.id = 'tab-' + sec.id;
+  btn.textContent = sec.icon + ' ' + sec.label;
+  btn.onclick = () => showSection(sec.id);
+  navEl.appendChild(btn);
+});
+
+// Build content
+const contentEl = document.getElementById('content');
+sections.forEach((sec, idx) => {
+  const div = document.createElement('div');
+  div.className = 'section' + (idx === 0 ? ' active' : '');
+  div.id = 'sec-' + sec.id;
+
+  let html = `<div class="section-header">
+    <div class="section-icon" style="font-size:20px">${sec.icon}</div>
+    <div>
+      <div class="section-title">${sec.label}</div>
+      <div class="section-count">${sec.items.length} éléments</div>
+    </div>
+  </div>
+  <div class="section-progress">
+    <div class="sec-progress-bar-wrap"><div class="sec-progress-bar-fill" id="sec-bar-${sec.id}" style="width:0%"></div></div>
+    <div class="sec-progress-label" id="sec-label-${sec.id}">0 / ${sec.items.length}</div>
+  </div>
+  <div class="items-list">`;
+
+  sec.items.forEach(([label, val, type], i) => {
+    const key = sec.id + i;
+    html += `<div class="item" id="item-${key}" onclick="toggle('${sec.id}',${i})">
+      <div class="checkbox">
+        <svg class="checkmark" viewBox="0 0 12 12" fill="none">
+          <polyline points="1.5,6 4.5,9.5 10.5,2.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span class="item-label">${label}</span>
+      <span class="${valClass(type)}">${val}</span>
+    </div>`;
+  });
+
+  html += `</div>
+  <div class="complete-banner" id="banner-${sec.id}">
+    <p>✓ Phase complétée</p>
+    <small>${sec.label.toUpperCase()} — TOUS LES ÉLÉMENTS VÉRIFIÉS</small>
+  </div>`;
+
+  // Add speed reference in landing section
+  if (sec.id === 'landing') {
+    html += `<div class="speeds-section" style="margin-top:12px">
+      <div class="speeds-title">Vitesses de référence</div>
+      <div class="speed-row"><span class="speed-name">Approche volets mi</span><span class="speed-val">75 KCAS</span></div>
+      <div class="speed-row"><span class="speed-name">Approche volets plein</span><span class="speed-val">65 KCAS</span></div>
+      <div class="speed-row"><span class="speed-name">Décrochage volets plein</span><span class="speed-val">55 KCAS</span></div>
+      <div class="speed-row"><span class="speed-name">Vitesse de croisière max</span><span class="speed-val">175 KTAS</span></div>
+      <div class="speed-row"><span class="speed-name">Ne jamais dépasser (Vne)</span><span class="speed-val">200 KTS</span></div>
+    </div>`;
+  }
+
+  div.innerHTML = html;
+  contentEl.appendChild(div);
+});
+
+updateGlobal();
+</script>
+</body>
+</html>
